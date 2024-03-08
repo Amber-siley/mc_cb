@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Any
-from mc_cb import _block_list
+from mc_cb._block_infor import _block_list
 
 _TMP_NAME=''
 
@@ -81,7 +81,7 @@ class _block_status:
     age_bit={"age_bit":[False,True]}
     '''生长阶段 0-1'''
     ground_sign_direction={"ground_sign_direction":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]}
-    '''旗帜的朝向 0-15'''
+    '''朝向 0-15'''
     open_bit={"open_bit":[False,True]}
     '''是否有玩家使用 0-1'''
     pillar_axis={"pillar_axis":["x","y","z"]}
@@ -177,7 +177,7 @@ class _block_status:
     coral_color={'coral_color':["blue","pink","purple","red","yellow"]}
     ''' 管珊瑚 脑纹珊瑚 气泡珊瑚 火珊瑚 鹿角珊瑚 0-4'''
     dead_bit={'dead_bit':[False,True]}
-    '''珊瑚是否失活 0-1'''
+    '''是否失活 0-1'''
     coral_fan_direction={'coral_fan_direction':[0,1,2,3]}
     '''珊瑚扇朝向的方向，正常情况下值都为1 0-3 '''
     coral_hang_type_bit={"coral_hang_type_bit":[False,True]}
@@ -194,7 +194,7 @@ class _block_status:
     triggered_bit={"triggered_bit":[False,True]}
     '''方块被激活时为true 0-1'''
     upper_block_bit={'upper_block_bit':[1,2,3,0]}
-    '''是否为门的上半部分 0-1'''
+    '''是否为上半部分 0-1'''
     door_hinge_bit={'door_hinge_bit':[False,True]}
     '''识别门轴在哪一边（从面向门“里面”的方向看）0-1'''
     end_portal_eye_bit={"end_portal_eye_bit":[False,True]}
@@ -202,7 +202,7 @@ class _block_status:
     moisturized_amount={'moisturized_amount':[0,1,2,3,4,5,6,7]}
     '''耕地方块的湿润程度 0-7'''
     wood_type={'wood_type':["oak","spruce","birch","jungle","acacia","dark_oak"]}
-    '''橡木栅栏 云杉木栅栏 白桦木栅栏 丛林木栅栏 金合欢木栅栏 深色橡木栅栏 0-5'''
+    '''橡木 云杉木 白桦木 丛林木 金合欢木 深色橡木 0-5'''
     in_wall_bit={"in_wall_bit":[False,True]}
     '''使其更贴合圆石墙和苔石墙的高度 0-1'''
     half={'half':["lower","upper"]}
@@ -227,7 +227,7 @@ class _block_status:
     '''物品展示框是否含有相片 0-1'''
     rotation={'rotation':[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]}
     '''- 生成结构时旋转的角度 n*90 0-3
-    - 生物头颅朝向 0-15'''
+    - 其他/生物头颅朝向 0-15'''
     kelp_age={"kelp_age":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]}
     '''生长程度 0-15'''
     liquid_depth={'liquid_depth':[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]}
@@ -266,7 +266,66 @@ class _block_status:
     '''铁轨样式 0-9'''
     rail_data_bit={'rail_data_bit':[False,True]}
     '''铁轨是否被激活 0-1'''
-    
+    output_subtract_bit={'output_subtract_bit':[False,True]}
+    '''定红石比较器的当前模式 0-1'''
+    output_lit_bit={'output_lit_bit':[False,True]}
+    '''是否为激活状态 0-1'''
+    repeater_delay={'repeater_delay':[0,1,2,3]}
+    '''红石中继器延迟的红石刻数减去1 0-3'''
+    torch_facing_direction={'torch_facing_direction':["unknown","west","east","north","south","top"]}
+    '''接触面位置 0-5'''
+    respawn_anchor_charge={'respawn_anchor_charge':[0,1,2,3,4]}
+    '''重生锚剩余的能量等级 0-4'''
+    sand_stone_type={'sand_stone_type':["default","heiroglyphs","cut","smooth"]}
+    '''砂岩类型 0-3'''
+    propagule_stage={'propagule_stage':[0,1,2,3,4]}
+    '''红树胎生苗悬挂时的年龄 0-4'''
+    stability_check={"stability_check":[False,True]}
+    '''脚手架是否稳定 0-1'''
+    stability={'stability':[0,1,2,3,4,5,6,7]}
+    '''距中心脚手架的水平距离。若为7，则将变为下落的方块实体 0-7'''
+    bloom={'bloom':[False,True]}
+    '''幽匿催发体是否处于蔓延状态 0-1'''
+    active={'active':[0,1]}
+    '''幽匿尖啸体是否处于激活状态 0-1'''
+    can_summon={'can_summon':[False,True]}
+    '''幽匿尖啸体能否召唤监守者 0-1'''
+    cluster_count={'cluster_count':[0,1,3]}
+    '''数量 0-3'''
+    attached={'attached':[False,True]}
+    '''锁链是否系于一点 0-1'''
+    attached_bit={'attached_bit':[False,True]}
+    '''锁链是否系于一点 0-1'''
+    stone_slab_type={'stone_slab_type':["smooth_stone","sandstone","wood","cobblestone","brick","stone_brick","quartz","nether_brick"]}
+    '''石砖的类型 0-7'''
+    top_slot_bit={'top_slot_bit':[False,True]}
+    '''此台阶是否位于上半部分 0-1'''
+    stone_slab_type_2={'stone_slab_type_2':["red_sandstone","purpur","prismarine_rough","prismarine_dark","prismarine_brick","mossy_cobblestone","smooth_sandstone","red_nether_brick"]}
+    '''石砖的类型 0-7'''
+    stone_slab_type_3={'stone_slab_type_3':["end_stone_brick","smooth_red_sandstone","polished_andesite","andesite","diorite","polished_diorite","granite","polished_granite"]}
+    '''石砖的类型 0-7'''
+    stone_slab_type_4={'stone_slab_type_4':["mossy_stone_brick","smooth_quartz","stone","cut_sandstone","cut_red_sandstone"]}
+    '''石砖的类型 0-4'''
+    height={'height':[0,1,2,3,4,5,6,7,8]}
+    '''厚度层数 0-8'''
+    covered_bit={'covered_bit',[False,True]}
+    '''是否有植物在此单元格含雪 0-1'''
+    sponge_type={'sponge_type':["dry","wet"]}
+    '''干湿海绵 0-1'''
+    upside_down_bit={"upside_down_bit":[False,True]}
+    '''楼梯是上下颠倒的则为true 0-1'''
+    weirdo_direction={'weirdo_direction':[0,1,2,3]}
+    '''楼梯整格面的朝向 0-3'''
+    stone_type={'stone_type':['stone',"granite","granite_smooth","diorite","diorite_smooth","andesite","andesite"]}
+    '''石头类型 0-6'''
+    stone_brick_type={'stone_brick_type':['chiseled',"cracked","default","mossy","smooth"]}
+    '''石砖类型 0-4'''
+    structure_block_type={'structure_block_type':["corner","data","export","invalid","load","save"]}
+    '''结构方块模式 0-5'''
+    structure_void_type={'structure_void_type':["air","void"]}
+    '''结构空位 0-1'''
+    tall_grass_type={'tall_grass_type':['default','tall','fern','snow']}
+    '''方块的变种，snow为是否积雪 0-3'''
     
     
 class block_list(_block_list):
