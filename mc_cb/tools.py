@@ -29,7 +29,16 @@ class json_manage:
         with open(self.file_path,"w",encoding='utf-8') as fp:
             content=dumps(content,indent=4)
             fp.write(content)
-        
+
+def command_str(*commands):
+    '''按照给与的字符串生成指令'''
+    return_data=""
+    max=len(commands)
+    for index,tmp in enumerate(commands):
+        return_data+=str(tmp)
+        if index+1<max: return_data+=" "
+    return return_data
+    
 def creat_behavior_pack():
     b_file_manage=file_manage()
     behavior_path=join(b_file_manage.work_path,Define.FILE_NAME)

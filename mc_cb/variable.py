@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Any
 from mc_cb._block_infor import _block_list,_block_status
 
@@ -28,7 +27,8 @@ class _block_name:
             else:
                 re_str=re_str+f'''"{attr}"="{option}"'''
             if id+1 != max:  re_str=re_str+","
-        return self._name,f'''[{re_str}]'''
+        re_str=f'''[{re_str}]'''
+        return f'''{self._name} {re_str}'''
     
 class _get_block_attr:
     def __init__(self,attrs:dict) -> None:
@@ -36,7 +36,7 @@ class _get_block_attr:
         self.attr,self.optional=list(attrs.items())[0]
         
     def __getitem__(self,index:int) -> tuple[str,str]:
-        return self.block,self._command_attr_park(index)
+        return self._command_attr_park(index)
     
     def _command_attr_park(self,index:int):
         '''返回mc指令方块属性部分的字符串类型'''
@@ -45,7 +45,7 @@ class _get_block_attr:
             attr_park=f'''["{self.attr}"={option}]'''
         else:
             attr_park=f'''["{self.attr}"="{option}"]'''
-        return attr_park
+        return f'''{self.block} {attr_park}'''
 
 class fill_handle:
     '''填充时旧方块的处理方式'''
@@ -59,12 +59,6 @@ class fill_handle:
     '''仅替换外层方块'''
     replace='replace'
     '''替换指定方块'''        
-    
-class clone_handle:
-    '''clone 模式'''
-    class fillered:
-        def __init__(self) -> None:
-            ...
 
 class block_list(_block_list):
     '''方块列表'''
@@ -103,21 +97,31 @@ class block_list(_block_list):
     
 class _clone_handle_attr:
     '''clone 模式副属性'''
-    def __init__(self,block_bit:bool) -> None:
-        self.block_bit=block_bit
+    def __init__(self,handle:str=None,block_bit:bool=False) -> None:
+        self._handle=handle
+        self._block_bit=block_bit
     
-    def _tmp(self,handle,block:block_list):
-        if self.block_bit:  return f"{handle} {block}"
-        else:   return f"{handle}"
+    def _tmp(self,handle_attr,block:block_list):
+        if self._block_bit:  return f"{self._handle} {handle_attr} {block}"
+        else:   return f"{self._handle} {handle_attr}"
         
-    @property
     def normal(self,block:block_list=block_list.iron_block):
         '''不执行force 与 move'''
         return self._tmp("normal",block)
     
-    @property
     def force(self,block:block_list=block_list.iron_block):
         '''强制复制'''
         return self._tmp("force",block)
-    
-    
+
+    def move(self,block:block_list=block_list.iron_block):
+        '''将源区域复制到目标区域'''
+        return self._tmp("move",block)
+        
+class clone_handle:
+    '''clone 模式'''
+    fillered=_clone_handle_attr(handle="fillered",block_bit=True)
+    '''仅复制符合方块ID的方块'''
+    masked=_clone_handle_attr(handle="masked")
+    '''仅复制非空气方块'''
+    replace=_clone_handle_attr(handle="replace")
+    '''复制所有方块'''
