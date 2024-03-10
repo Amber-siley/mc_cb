@@ -30,6 +30,27 @@ class json_manage:
             content=dumps(content,indent=4)
             fp.write(content)
 
+class behavior_pack:
+    def __init__(self,work_path:str=None) -> None:
+        self.work_path=work_path
+    
+    def create_behavior_pack():
+        b_file_manage=file_manage()
+        behavior_path=join(b_file_manage.work_path,Define.FILE_NAME)
+        function_path=join(Define.FILE_NAME,"functions")
+        makedirs(function_path)
+        b_file_manage.touch('pack_icon.png',behavior_path)
+        manifest_path=join(behavior_path,'manifest.json')
+        manifest_json=json_manage(manifest_path)
+        manifest_json.write(Define.MANIFEST._manifest_dict)
+
+class tick:
+    tick={"values":[]}
+    
+    def add(function):
+        def add_1(*args, **kwargs):
+            ...
+    
 def command_str(*commands):
     '''按照给与的字符串生成指令'''
     return_data=""
@@ -39,12 +60,3 @@ def command_str(*commands):
         if index+1<max: return_data+=" "
     return return_data
     
-def creat_behavior_pack():
-    b_file_manage=file_manage()
-    behavior_path=join(b_file_manage.work_path,Define.FILE_NAME)
-    function_path=join(Define.FILE_NAME,"functions")
-    makedirs(function_path)
-    b_file_manage.touch('pack_icon.png',behavior_path)
-    manifest_path=join(behavior_path,'manifest.json')
-    manifest_json=json_manage(manifest_path)
-    manifest_json.write(Define.MANIFEST._manifest_dict)
