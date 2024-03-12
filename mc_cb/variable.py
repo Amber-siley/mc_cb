@@ -2,6 +2,7 @@ from typing import Any
 from mc_cb._block_infor import _block_list,_block_status
 
 _TMP_NAME=''
+_TMP_FUNCTION=[]
 
 class _block_name:
     def __init__(self,name) -> None:
