@@ -1,16 +1,17 @@
-from os import getcwd,makedirs
+from os import getcwd,makedirs,mkdir
 from os.path import join,exists
+from zipfile import ZipFile
 from tkinter.filedialog import askdirectory
 from json import dumps
 from uuid import uuid1
 from typing import Callable
 from .variable import _TMP_FUNCTION
-
+from shutil import make_archive
 
 class file_manage:
     def __init__(self,work_path:str=getcwd()) -> None:
         self.work_path=work_path
-
+    
     def touch(self,file_name,save_path=None,exist:bool=False):
         if not save_path:   file_path=join(self.work_path,file_name)
         else:   file_path=join(save_path,file_name)
@@ -19,7 +20,7 @@ class file_manage:
         else:
             is_live=False
         if not is_live:
-            with open(file_path,"a") as fp: ...
+            with open(file_path,"w+") as fp: ...
             return file_path
         
     def save(self,content:bytes | str,file_name:str,save_path=None,exist:bool=False):
@@ -34,7 +35,21 @@ class file_manage:
         if not is_live:
             with open(file_path,mode) as fp:    fp.write(content)
             return file_path
-        
+
+    @staticmethod
+    def zip(raw_path,new_path):
+        make_archive(new_path,"zip",raw_path)
+    
+    @staticmethod
+    def mkdir(path,exist:bool=False):
+        if exist:
+            if exists(path):
+                return 0
+        try:
+            mkdir(path)
+        except:
+            ...
+            
 class json_manage:
     def __init__(self,file_path) -> None:
         self.file_path=file_path
@@ -48,7 +63,7 @@ class json_manage:
             with open(self.file_path,"w",encoding='utf-8') as fp:
                 content=dumps(content,indent=4)
                 fp.write(content)
-
+    
 class _manifest:
     '''附加包主描述文件
     - format_version
@@ -97,15 +112,20 @@ class behavior_pack(file_manage):
     def function_path(self):
         return join(self.behavior_path,"functions")
     
-    def create_behavior_pack(self) -> str:
+    def create_behavior_pack(self):
         self.behavior_path=join(self.work_path,self.FILE_NAME)
-        function_path=join(self.FILE_NAME,"functions")
-        makedirs(function_path,exist_ok=True)
+        self.mkdir(self.behavior_path,True)
+        self.mkdir(self.function_path,True)
         self.touch('pack_icon.png',self.behavior_path,True)
         self.manifest_path=join(self.behavior_path,'manifest.json')
         manifest_json=json_manage(self.manifest_path)
         manifest_json.write(self.MANIFEST._manifest_dict,True)
 
+    def create_behavior_mcaddon(self):
+        self.create_behavior_pack()
+        self.zip(join(self.work_path,self.FILE_NAME),self.behavior_path)
+        
+    
     def read_hehavivor_pack(self,behavior_path:str=None):
         '''- behavior_path 行为包包路径
         \n默认为空则为手动选择'''
@@ -125,7 +145,7 @@ class behavior_pack(file_manage):
         return tmp_1
     
 class tmp_function:
-    '''展示存储指令列表'''
+    '''暂时存储指令列表'''
     global _TMP_FUNCTION
     @staticmethod
     def add(command_str:str):
