@@ -3,6 +3,7 @@ from mc_cb._block_infor import _block_list,_block_status
 
 _TMP_NAME=''
 _TMP_FUNCTION=[]
+_TMP_POS=[]
 
 class _block_name:
     def __init__(self,name) -> None:
@@ -115,7 +116,7 @@ class _clone_handle_attr:
         return self._tmp("force",block)
 
     def move(self,block:block_list=block_list.iron_block):
-        '''将源区域复制到目标区域'''
+        '''将源区域移动到目标区域'''
         return self._tmp("move",block)
         
 class clone_handle:

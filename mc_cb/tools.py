@@ -20,7 +20,7 @@ class file_manage:
         else:
             is_live=False
         if not is_live:
-            with open(file_path,"w+") as fp: ...
+            with open(file_path,"a+") as fp: ...
             return file_path
         
     def save(self,content:bytes | str,file_name:str,save_path=None,exist:bool=False):
@@ -137,9 +137,10 @@ class behavior_pack(file_manage):
             def tmp_2():
                 function(*args, **kwargs)
                 func_path=join(self.function_path,tree,f"{function.__name__}.mcfunction")
-                with open(func_path,"a+",encoding="utf-8") as fp:
+                with open(func_path,"w+",encoding="utf-8") as fp:
                     for command in _TMP_FUNCTION:
                         fp.write(f"{command}\n")
+                    tmp_function.cls()
             tmp_2()
             return tmp_2
         return tmp_1
