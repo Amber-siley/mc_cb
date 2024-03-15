@@ -1,53 +1,10 @@
-from typing import Any
-from mc_cb._block_infor import _block_list,_block_status
-
 _TMP_NAME=''
 _TMP_FUNCTION=[]
 _TMP_POS=[]
 
-class _block_name:
-    def __init__(self,name) -> None:
-        self._name=name
-        global _TMP_NAME
-        _TMP_NAME=name
-        
-    def __str__(self) -> str:
-        return self._name
-
-    def _command_attr_park(self,**kwargs) ->tuple[str,str]:
-        '''返回mc指令方块名称以及属性部分的字符串类型'''
-        re_str=''
-        kwargs={i:j for i,j in kwargs.items() if j != None}
-        max=len(kwargs)
-        for id,args in enumerate(kwargs.items()):
-            _attr,index=args
-            options=self.__getattribute__(_attr)
-            option=options.optional[index]
-            attr=options.attr
-            if isinstance(option,bool) or isinstance(option,int):
-                re_str=re_str+f'''"{attr}"={option}'''
-            else:
-                re_str=re_str+f'''"{attr}"="{option}"'''
-            if id+1 != max:  re_str=re_str+","
-        re_str=f'''[{re_str}]'''
-        return f'''{self._name} {re_str}'''
-    
-class _get_block_attr:
-    def __init__(self,attrs:dict) -> None:
-        self.block=_TMP_NAME
-        self.attr,self.optional=list(attrs.items())[0]
-        
-    def __getitem__(self,index:int) -> tuple[str,str]:
-        return self._command_attr_park(index)
-    
-    def _command_attr_park(self,index:int):
-        '''返回mc指令方块属性部分的字符串类型'''
-        option=self.optional[index]
-        if isinstance(option,bool) or isinstance(option,int):
-            attr_park=f'''["{self.attr}"={option}]'''
-        else:
-            attr_park=f'''["{self.attr}"="{option}"]'''
-        return f'''{self.block} {attr_park}'''
+from ._block_infor import block_list
+from .tools import command_str
+from typing import Callable
 
 class fill_handle:
     '''填充时旧方块的处理方式'''
@@ -61,41 +18,6 @@ class fill_handle:
     '''仅替换外层方块'''
     replace='replace'
     '''替换指定方块'''        
-
-class block_list(_block_list):
-    '''方块列表'''
-    '''这里这么写是方便代码'''
-    class _anvil(_block_name):
-        def __init__(self, name) -> None:
-            super().__init__(name)
-            self.damage=_get_block_attr(_block_status.damage)
-            '''破损程度由低到高 0-3'''
-            self.direction=_get_block_attr(_block_status.direction)
-            '''朝向 0-3'''
-            self.cardinal_direction=_get_block_attr(_block_status.cardinal_direction)
-            '''朝向 东南西北 0-3'''
-        def set_attr(self,damage:int=None,direction:int=None,cardinal_direction:int=None) ->tuple[str,str]:
-            '''- damage 破损程度由低到高 0-3
-            - direction 朝向 0-3
-            - cardinal_direction 朝向 东南西北 0-3'''
-            return self._command_attr_park(damage=damage,direction=direction,cardinal_direction=cardinal_direction)
-            
-    class _amethyst_cluster(_block_name):
-        def __init__(self, name) -> None:   
-            super().__init__(name)
-            self.facing_direction=_get_block_attr(_block_status.facing_direction)
-            '''朝向 0-5'''
-            self.block_face=_get_block_attr(_block_status.block_face)
-            '''朝向 东南西北上下 0-5'''
-        def set_attr(self,facing_direction:int=None,block_face:int=None):
-            '''- facing_direction 朝向 上下东南西北 0-5
-            - block_face 朝向 上下东南西北 0-5'''
-            return self._command_attr_park(facing_direction=facing_direction,block_face=block_face)
-    
-    anvil=_anvil(_block_list.anvil)
-    '''铁砧'''
-    amethyst_cluster=_amethyst_cluster(_block_list.amethyst_cluster)
-    '''紫水晶簇'''
     
 class _clone_handle_attr:
     '''clone 模式副属性'''
@@ -127,3 +49,70 @@ class clone_handle:
     '''仅复制非空气方块'''
     replace=_clone_handle_attr(handle="replace")
     '''复制所有方块'''
+
+class _attr_value:
+    '''通过index进行设置'''
+    def __init__(self,command_attr:str,format:Callable,default) -> None:
+        self.command_attr=command_attr
+        self.getitem=format
+        self.default=default
+    
+    def __getitem__(self,key=None):
+        return self.getitem(key)
+
+    def __str__(self) -> str:
+        return str(self.default)
+        
+class target_attrs:
+    X=_attr_value("x",lambda x : x,"~")
+    Y=_attr_value("y",lambda y : y,"~")
+    Z=_attr_value("z",lambda z : z,"~")
+    r=_attr_value("r",lambda r : r,0)
+    l=_attr_value("r",lambda l : l,0)
+    rm=_attr_value("rm",lambda rm : rm,0)
+    lm=_attr_value("lm",lambda lm : lm,0)
+    c=_attr_value("c",lambda c : c,0)
+    name=_attr_value("name",lambda name : name,"steve")
+    not_name=_attr_value("name",lambda name : f'!{name}',"steve")
+    class m:
+        adventure=_attr_value("m",lambda:"adventure","adventure")
+        creative=_attr_value("m",lambda:"creative","creative")
+        default=_attr_value("m",lambda:"default","default")
+        spectator=_attr_value("m",lambda:"spectator","spectator")
+        survival=_attr_value("m",lambda:"survival","survival")
+        not_adventure=_attr_value("m",lambda:"!adventure","!adventure")
+        not_creative=_attr_value("m",lambda:"!creative","!creative")
+        not_default=_attr_value("m",lambda:"!default","!default")
+        not_spectator=_attr_value("m",lambda:"!spectator","!spectator")
+        not_survival=_attr_value("m",lambda:"!survival","!survival")
+    
+        
+        
+    
+
+class target:
+    '''目标选择器'''
+    def __init__(self,*args:target_attrs) -> None:
+        pass
+
+class execute_handle:
+    '''execute 子命令'''
+    class align:
+        '''对坐标进行向下取整'''
+        x="align x"
+        y="align y"
+        z="align z"
+        xy="align xy"
+        xz="align xz"
+        yz="align yz"
+        xyz="align xyz"
+        
+    class anchored:
+        '''更改执行基准点'''
+        eyes="anchored eyes"
+        '''执行为头部'''
+        feet="anchored feet"
+        ''''执行为腿部'''
+        
+    class As:
+        ...

@@ -1,3 +1,48 @@
+
+class _block_name:
+    def __init__(self,name) -> None:
+        self._name=name
+        global _TMP_NAME
+        _TMP_NAME=name
+        
+    def __str__(self) -> str:
+        return self._name
+
+    def _command_attr_park(self,**kwargs) ->tuple[str,str]:
+        '''返回mc指令方块名称以及属性部分的字符串类型'''
+        re_str=''
+        kwargs={i:j for i,j in kwargs.items() if j != None}
+        max=len(kwargs)
+        for id,args in enumerate(kwargs.items()):
+            _attr,index=args
+            options=self.__getattribute__(_attr)
+            option=options.optional[index]
+            attr=options.attr
+            if isinstance(option,bool) or isinstance(option,int):
+                re_str=re_str+f'''"{attr}"={option}'''
+            else:
+                re_str=re_str+f'''"{attr}"="{option}"'''
+            if id+1 != max:  re_str=re_str+","
+        re_str=f'''[{re_str}]'''
+        return f'''{self._name} {re_str}'''
+    
+class _get_block_attr:
+    def __init__(self,attrs:dict) -> None:
+        self.block=_TMP_NAME
+        self.attr,self.optional=list(attrs.items())[0]
+        
+    def __getitem__(self,index:int) -> tuple[str,str]:
+        return self._command_attr_park(index)
+    
+    def _command_attr_park(self,index:int):
+        '''返回mc指令方块属性部分的字符串类型'''
+        option=self.optional[index]
+        if isinstance(option,bool) or isinstance(option,int):
+            attr_park=f'''["{self.attr}"={option}]'''
+        else:
+            attr_park=f'''["{self.attr}"="{option}"]'''
+        return f'''{self.block} {attr_park}'''
+
 class _block_list:
     stone="stone"
     '''石头'''
@@ -1971,3 +2016,38 @@ class _block_status:
     stripped_bit={"stripped_bit":[False,True]}
     '''是否被去皮 0-1'''
 
+class block_list(_block_list):
+    '''方块列表'''
+    '''这里这么写是方便代码'''
+    class _anvil(_block_name):
+        def __init__(self, name) -> None:
+            super().__init__(name)
+            self.damage=_get_block_attr(_block_status.damage)
+            '''破损程度由低到高 0-3'''
+            self.direction=_get_block_attr(_block_status.direction)
+            '''朝向 0-3'''
+            self.cardinal_direction=_get_block_attr(_block_status.cardinal_direction)
+            '''朝向 东南西北 0-3'''
+        def set_attr(self,damage:int=None,direction:int=None,cardinal_direction:int=None) ->tuple[str,str]:
+            '''- damage 破损程度由低到高 0-3
+            - direction 朝向 0-3
+            - cardinal_direction 朝向 东南西北 0-3'''
+            return self._command_attr_park(damage=damage,direction=direction,cardinal_direction=cardinal_direction)
+            
+    class _amethyst_cluster(_block_name):
+        def __init__(self, name) -> None:   
+            super().__init__(name)
+            self.facing_direction=_get_block_attr(_block_status.facing_direction)
+            '''朝向 0-5'''
+            self.block_face=_get_block_attr(_block_status.block_face)
+            '''朝向 东南西北上下 0-5'''
+        def set_attr(self,facing_direction:int=None,block_face:int=None):
+            '''- facing_direction 朝向 上下东南西北 0-5
+            - block_face 朝向 上下东南西北 0-5'''
+            return self._command_attr_park(facing_direction=facing_direction,block_face=block_face)
+    
+    anvil=_anvil(_block_list.anvil)
+    '''铁砧'''
+    amethyst_cluster=_amethyst_cluster(_block_list.amethyst_cluster)
+    '''紫水晶簇'''
+    
