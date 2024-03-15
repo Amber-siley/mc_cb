@@ -72,14 +72,14 @@ class _manifest:
     - dependencies'''
     def __init__(self) -> None:
         self.format_version=1
-        self.header={"description":"description","name":"behavior_pack","uuid":str(uuid1()),"version":[1,0,0],"min_engine_version":[1,16,0]}
+        self.header={"description":"description","name":"behavior_pack","uuid":str(uuid1()),"version":[1,0,0],"min_engine_version":[1,13,0]}
         '''
         索引     and        值
         - description       " "
         - name              " "
         - uuid              " "
         - version           [1,0,0]
-        - min_engine_version[1,16,0]'''
+        - min_engine_version[1,13,0]'''
         self.modules={"description":"description","type":"data","uuid":str(uuid1()),"version":[1,0,0]}
         '''
         索引     and        值
@@ -131,12 +131,12 @@ class behavior_pack(file_manage):
         \n默认为空则为手动选择'''
         if not behavior_path:   behavior_path=askdirectory()
     
-    def add_func(self,is_alive:bool=False,is_repeat:bool=False,tree:tuple[str]=(""),*condition:Callable):
+    def add_func(self,is_alive:bool=False,is_repeat:bool=False,save_tree:tuple[str]=(""),*condition:Callable):
         '''装饰器'''
         def tmp_1(function:Callable,*args, **kwargs):
             def tmp_2():
                 function(*args, **kwargs)
-                func_path=join(self.function_path,tree,f"{function.__name__}.mcfunction")
+                func_path=join(self.function_path,save_tree,f"{function.__name__}.mcfunction")
                 with open(func_path,"w+",encoding="utf-8") as fp:
                     for command in _TMP_FUNCTION:
                         fp.write(f"{command}\n")
