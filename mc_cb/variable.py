@@ -1,7 +1,3 @@
-_TMP_NAME=''
-_TMP_FUNCTION=[]
-_TMP_POS=[]
-
 from ._block_infor import block_list
 from .tools import command_str
 from typing import Callable

@@ -5,7 +5,8 @@
 ################################################################
 
 
-from .variable import block_list,fill_handle,clone_handle,_TMP_POS
+from .variable import block_list,fill_handle,clone_handle
+from .define import _TMP_POS
 from .tools import command_str,tmp_function
 from re import findall
 
