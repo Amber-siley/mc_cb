@@ -4,7 +4,7 @@ from zipfile import ZipFile
 from tkinter.filedialog import askdirectory
 from json import dumps
 from uuid import uuid1
-from typing import Callable
+from typing import Callable,Any
 from .define import _TMP_FUNCTION
 from shutil import make_archive,move,copy,copytree,rmtree
 from zipfile import ZipFile
@@ -20,16 +20,21 @@ class _attr_value:
         self.getitem=format
         self.default=default
         self.inherited=inherited
+        self.final_value=None
     
     def __getitem__(self,key=None):
         self.final_value=self.getitem(key)
         return self.getitem(key)
 
-    def __str__(self) -> str:
-        if self.inherited:
-            return str(self.final_value)
-        return str(self.default)
+    @property
+    def get(self) -> Any:
+        if self.inherited and self.final_value:
+            return self.final_value
+        return self.default
 
+    def __str__(self) -> str:
+        return str(self.get())
+    
 class file_manage:
     def __init__(self,work_path:str=getcwd()) -> None:
         self.work_path=work_path
@@ -146,20 +151,20 @@ class _manifest:
         description="description"
         '''简介'''
         uuid=str(uuid1())
-        version=_attr_value("",lambda _list:f"[{_list[0]},{_list[1]},{_list[2]}]",[1,0,0],True)
+        version=_attr_value("",lambda _list:_list,[1,0,0],True)
         '''版本号 Use: \n >>> version[1,2,4] #版本号1.2.4'''
-        min_engine_version=_attr_value("",lambda _list:f"[{_list[0]},{_list[1]},{_list[2]}]",[1,16,0],True)
+        min_engine_version=_attr_value("",lambda _list:_list,[1,16,0],True)
         '''游戏最低版本 Use: \n >>> min_engine_version[1,16,0] #最低版本1,16,0'''
     
     class _manifest_modules:
         type="data"
         description="description"
         uuid=str(uuid1())
-        version=_attr_value("",lambda _list:f"[{_list[0]},{_list[1]},{_list[2]}]",[1,0,0],True)
+        version=_attr_value("",lambda _list:_list,[1,0,0],True)
     
     class _manifest_depen:
         uuid=None
-        version=_attr_value("",lambda _list:f"[{_list[0]},{_list[1]},{_list[2]}]",[1,0,0],True)
+        version=_attr_value("",lambda _list:_list,[1,0,0],True)
         
     def __init__(self) -> None:
         self.format_version=2
@@ -170,17 +175,17 @@ class _manifest:
     @property
     def _header(self):
         header=self.header
-        return {"description":header.description,"name":header.name,"uuid":header.uuid,"version":header.version,"min_engine_version":header.min_engine_version}
+        return {"description":header.description,"name":header.name,"uuid":header.uuid,"version":header.version.get,"min_engine_version":header.min_engine_version.get}
     
     @property
     def _modules(self):
         modules=self.modules
-        return {"description":modules.description,"type":modules.type,"uuid":modules.uuid,"version":modules.version}
+        return {"description":modules.description,"type":modules.type,"uuid":modules.uuid,"version":modules.version.get}
     
     @property
     def _dependencies(self):
         depen=self.dependencies
-        return {"uuid":depen.uuid,"version":depen.version}
+        return {"uuid":depen.uuid,"version":depen.version.get}
     
     @property
     def _manifest_dict(self):

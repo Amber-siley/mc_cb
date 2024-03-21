@@ -46,7 +46,6 @@ class clone_handle:
     replace=_clone_handle_attr(handle="replace")
     '''复制所有方块'''
 
-        
 class target_attrs:
     X=_attr_value("x",lambda x : x,"~")
     Y=_attr_value("y",lambda y : y,"~")
@@ -69,10 +68,6 @@ class target_attrs:
         not_default=_attr_value("m",lambda:"!default","!default")
         not_spectator=_attr_value("m",lambda:"!spectator","!spectator")
         not_survival=_attr_value("m",lambda:"!survival","!survival")
-    
-        
-        
-    
 
 class target:
     '''目标选择器'''

@@ -115,7 +115,7 @@ class _pos_transformation:
         postions=[(i,j) for i,j in postions if i != "" or j !=""]
         return postions
     
-class fill:
+class fill(fill_handle):
     '''fill 指令'''
     def __init__(self,xyz_1:str="~~~",xyz_2:str="~~~",block:block_list=block_list.iron_block,fill_handle:fill_handle=fill_handle.replace) -> None:
         _command_str=""
@@ -124,14 +124,24 @@ class fill:
         self.command_str=_command_str[:-1]
         tmp_function.add(self.command_str)
 
-class setblock:
+    class block_list(block_list):
+        ...
+        
+class setblock(fill_handle):
     '''setblock'''
     def __init__(self,xyz:str="~~~",block:block_list=block_list.iron_block,fill_handle:fill_handle=fill_handle.replace) -> None:
         self.command_str=command_str("setblock",xyz,block,fill_handle)
         tmp_function.add(self.command_str)
-        
-class clone:
+    
+    class block_list(block_list):
+        ...
+    
+    
+class clone(clone_handle):
     '''clone'''
     def __init__(self,xyz_1:str="~~~",xyz_2:str="~~~",xyz_pos="~~~",handle:clone_handle=clone_handle.replace.normal()) -> None:
         self.command_str=command_str("clone",xyz_1,xyz_2,xyz_pos,handle)
         tmp_function.add(self.command_str)
+    
+    class block_list(block_list):
+        ...
