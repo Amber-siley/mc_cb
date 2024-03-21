@@ -9,6 +9,27 @@ from .define import _TMP_FUNCTION
 from shutil import make_archive,move,copy,copytree,rmtree
 from zipfile import ZipFile
 
+class _attr_value:
+    '''通过index进行设置'''
+    def __init__(self,attr:str,format:Callable,default,inherited:bool = False) -> None:
+        '''- attr 属性
+        - format 通过__getitem__获取参数进行处理的函数
+        - default 默认值
+        - inherited 是否继承最后一次设置的值'''
+        self.attr=attr
+        self.getitem=format
+        self.default=default
+        self.inherited=inherited
+    
+    def __getitem__(self,key=None):
+        self.final_value=self.getitem(key)
+        return self.getitem(key)
+
+    def __str__(self) -> str:
+        if self.inherited:
+            return str(self.final_value)
+        return str(self.default)
+
 class file_manage:
     def __init__(self,work_path:str=getcwd()) -> None:
         self.work_path=work_path
@@ -112,50 +133,70 @@ class json_manage:
             with open(self.file_path,"w",encoding='utf-8') as fp:
                 content=dumps(content,indent=4)
                 fp.write(content)
-    
+
 class _manifest:
     '''附加包主描述文件
     - format_version
     - header
     - modules
     - dependencies'''
+    class _manifest_header:
+        name="behavior_pack"
+        '''资源包名称'''
+        description="description"
+        '''简介'''
+        uuid=str(uuid1())
+        version=_attr_value("",lambda _list:f"[{_list[0]},{_list[1]},{_list[2]}]",[1,0,0],True)
+        '''版本号 Use: \n >>> version[1,2,4] #版本号1.2.4'''
+        min_engine_version=_attr_value("",lambda _list:f"[{_list[0]},{_list[1]},{_list[2]}]",[1,16,0],True)
+        '''游戏最低版本 Use: \n >>> min_engine_version[1,16,0] #最低版本1,16,0'''
+    
+    class _manifest_modules:
+        type="data"
+        description="description"
+        uuid=str(uuid1())
+        version=_attr_value("",lambda _list:f"[{_list[0]},{_list[1]},{_list[2]}]",[1,0,0],True)
+    
+    class _manifest_depen:
+        uuid=None
+        version=_attr_value("",lambda _list:f"[{_list[0]},{_list[1]},{_list[2]}]",[1,0,0],True)
+        
     def __init__(self) -> None:
         self.format_version=2
-        self.header={"description":"description","name":"behavior_pack","uuid":str(uuid1()),"version":[1,0,0],"min_engine_version":[1,16,0]}
-        '''
-        索引     and        值
-        - description       " "
-        - name              " "
-        - uuid              " "
-        - version           [1,0,0]
-        - min_engine_version[1,16,0]'''
-        self.modules={"description":"description","type":"data","uuid":str(uuid1()),"version":[1,0,0]}
-        '''
-        索引     and        值
-        - description   " "
-        - type     "data" or "resource"
-        - uuid          " "
-        - version       [1,0,0]'''
-        self.dependencies={"uuid":None,"version":[1,0,0]}
-        '''
-        索引     and        值
-        - uuid      " "
-        - version   [1,0,0]'''
+        self.header=self._manifest_header()
+        self.modules=self._manifest_modules()
+        self.dependencies=self._manifest_depen()
+    
+    @property
+    def _header(self):
+        header=self.header
+        return {"description":header.description,"name":header.name,"uuid":header.uuid,"version":header.version,"min_engine_version":header.min_engine_version}
+    
+    @property
+    def _modules(self):
+        modules=self.modules
+        return {"description":modules.description,"type":modules.type,"uuid":modules.uuid,"version":modules.version}
+    
+    @property
+    def _dependencies(self):
+        depen=self.dependencies
+        return {"uuid":depen.uuid,"version":depen.version}
     
     @property
     def _manifest_dict(self):
-        _manifest_dict={'format_version':self.format_version,"header":self.header,"modules":[self.modules]}
-        if self.dependencies['uuid']:
-           _manifest_dict["dependencies"]=[self.dependencies]
+        _manifest_dict={'format_version':self.format_version,"header":self._header,"modules":[self._modules]}
+        if self.dependencies.uuid:
+           _manifest_dict["dependencies"]=[self._dependencies]
         return _manifest_dict
 
 class behavior_pack(file_manage):
     '''行为包管理'''
-    def __init__(self,work_path:str=getcwd()) -> None:
+    def __init__(self,name,work_path:str=getcwd()) -> None:
         super().__init__(work_path)
-        self.FILE_NAME='init'
-        '''行为包文件夹或者行为包名称'''
+        self.FILE_NAME=name
+        '''行为包工程文件夹名称'''
         self.MANIFEST=_manifest()
+        self.MANIFEST.header.name=self.FILE_NAME
         
     @property
     def function_path(self):
@@ -181,11 +222,6 @@ class behavior_pack(file_manage):
         file_name=f"{self.FILE_NAME}.mcaddon"
         self.rm(join(tmp_mcaddon_path))
         self.rename(zip_path,file_name)
-    
-    def read_hehavivor_pack(self,behavior_path:str=None):
-        '''- behavior_path 行为包包路径
-        \n默认为空则为手动选择'''
-        if not behavior_path:   behavior_path=askdirectory()
     
     def add_func(self,is_alive:bool=False,is_repeat:bool=False,save_tree:tuple[str]=(""),*condition:Callable):
         '''装饰器'''

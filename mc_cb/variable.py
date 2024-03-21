@@ -1,5 +1,5 @@
 from ._block_infor import block_list
-from .tools import command_str
+from .tools import command_str,_attr_value
 from typing import Callable
 
 class fill_handle:
@@ -46,18 +46,6 @@ class clone_handle:
     replace=_clone_handle_attr(handle="replace")
     '''复制所有方块'''
 
-class _attr_value:
-    '''通过index进行设置'''
-    def __init__(self,command_attr:str,format:Callable,default) -> None:
-        self.command_attr=command_attr
-        self.getitem=format
-        self.default=default
-    
-    def __getitem__(self,key=None):
-        return self.getitem(key)
-
-    def __str__(self) -> str:
-        return str(self.default)
         
 class target_attrs:
     X=_attr_value("x",lambda x : x,"~")
