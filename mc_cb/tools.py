@@ -1,5 +1,5 @@
-from os import getcwd,rename,mkdir,unlink
-from os.path import join,exists,splitext,isdir,split,isfile
+from os import getcwd,rename,mkdir,unlink,walk
+from os.path import join,exists,isdir,split,isfile,basename,dirname,relpath
 from zipfile import ZipFile
 from tkinter.filedialog import askdirectory
 from json import dumps
@@ -7,6 +7,7 @@ from uuid import uuid1
 from typing import Callable
 from .define import _TMP_FUNCTION
 from shutil import make_archive,move,copy,copytree,rmtree
+from zipfile import ZipFile
 
 class file_manage:
     def __init__(self,work_path:str=getcwd()) -> None:
@@ -38,7 +39,21 @@ class file_manage:
 
     @staticmethod
     def zip(raw_path,new_path):
-        return make_archive(new_path,"zip",raw_path)
+        if isdir(new_path):
+            zip_file_name=f"{split(new_path)[1]}.zip"
+        elif isfile(new_path):
+            zip_file_name=basename(new_path)
+        dir=split(new_path)[0]
+        if isdir(raw_path):
+            with ZipFile(join(dir,zip_file_name), 'w', 8) as zipf:
+                for root, _, files in walk(raw_path):
+                    for file in files:
+                        file_path = join(root, file)
+                        arcname = relpath(file_path, raw_path)
+                        zipf.write(file_path, arcname=arcname)
+                return join(dir,zip_file_name)
+        else:
+            return make_archive(new_path,"zip",raw_path)
     
     @staticmethod
     def mkdir(path,exist:bool=False):
@@ -146,27 +161,26 @@ class behavior_pack(file_manage):
     def function_path(self):
         return join(self.behavior_path,"functions")
     
-    def create_behavior_pack(self,dir:tuple[str]=("")) -> str:
-        '''dir 表示在工作目录下的子目录'''
-        self.behavior_path=join(self.work_path,dir,self.FILE_NAME)
-        tmp_path=join(self.work_path,dir)
-        if dir[0] != "":
-            self.mkdir(tmp_path)
+    def create_behavior_pack(self) -> str:
+        '''创建行为包工程文件夹及其文件'''
+        self.behavior_path=join(self.work_path,self.FILE_NAME)
         self.mkdir(self.behavior_path,True)
         self.mkdir(self.function_path,True)
         self.touch('pack_icon.png',self.behavior_path,True)
         self.manifest_path=join(self.behavior_path,'manifest.json')
         manifest_json=json_manage(self.manifest_path)
         manifest_json.write(self.MANIFEST._manifest_dict,True)
-        return self.behavior_path,tmp_path
+        return self.behavior_path
 
-    def create_behavior_mcaddon(self):
-        tmp,mcaddon_path=self.create_behavior_pack(self.FILE_NAME)
-        zip_path=self.zip(join(self.work_path,self.FILE_NAME),mcaddon_path)
-        zip_dir=list(splitext(zip_path))
-        zip_dir[1]=".mcaddon"
-        self.rm(join(self.work_path,self.FILE_NAME))
-        self.rename(zip_path,"".join(zip_dir))
+    def build_mcaddon(self):
+        '''打包构建附加包的mcaddon格式'''
+        tmp_mcaddon_path=join(self.work_path,f"tmp_{self.FILE_NAME}")
+        self.mkdir(tmp_mcaddon_path,True)
+        self.cp(self.behavior_path,join(tmp_mcaddon_path,self.FILE_NAME))
+        zip_path=self.zip(tmp_mcaddon_path,join(self.work_path,self.FILE_NAME))
+        file_name=f"{self.FILE_NAME}.mcaddon"
+        self.rm(join(tmp_mcaddon_path))
+        self.rename(zip_path,file_name)
     
     def read_hehavivor_pack(self,behavior_path:str=None):
         '''- behavior_path 行为包包路径
