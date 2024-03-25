@@ -93,5 +93,5 @@ class execute_handle:
         feet="anchored feet"
         ''''执行为腿部'''
         
-    class As:
+    class As(target):
         ...

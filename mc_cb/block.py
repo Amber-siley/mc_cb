@@ -8,9 +8,9 @@
 from .variable import block_list,fill_handle,clone_handle
 from .define import _TMP_POS
 from .tools import command_str,tmp_function
-from re import findall
+from .game import _position
 
-class _pos_transformation:
+class _pos_transformation(_position):
     '''坐标变换，使方块操作更加优雅'''
     def __init__(self,xyz_1:str | list[tuple[str,str]],xyz_2:str | list[tuple[str,str]]) -> None:
         self.xyz_1=self.real_pos(xyz_1)
@@ -79,41 +79,10 @@ class _pos_transformation:
         index=_pos.index(max(_pos))
         return pos[index]
     
-    @staticmethod
-    def parse_pos(pos:list[tuple[str,str]]) ->list[int]:
-        '''解析坐标（并非真实坐标） -> [x,y,z]'''
-        if isinstance(pos[0],int):
-            return pos
-        return [int(j) if j != "" else 0 for i,j in pos]
-    
     def __str__(self):
         postion=self.xyz_1+self.xyz_2
         postion=["".join(i) for i in postion]
         return " ".join(postion)
-
-    @staticmethod
-    def return_pos(pos:list[int],format:list[tuple[str,str]]) ->list[tuple[str,str]]:
-        return [(format[index][0],str(value)) for index,value in enumerate(pos)]
-    
-    @staticmethod
-    def pos_type(pos):
-        tmp=[i for i,j in pos if i in ["~","^"]]
-        if len(tmp) == 3:
-            pos_type="relative"
-        elif len(tmp) == 0:
-            pos_type="absolute"
-        else:
-            pos_type="unknown"
-        return pos_type
-        
-    @staticmethod
-    def real_pos(pos):
-        if isinstance(pos,list):
-            return pos
-        pos_rule="([~,^]?)([-,+]?\d*)"
-        postions=findall(pos_rule,pos)
-        postions=[(i,j) for i,j in postions if i != "" or j !=""]
-        return postions
     
 class fill(fill_handle):
     '''fill 指令'''
