@@ -1,4 +1,4 @@
-from os import getcwd,rename,mkdir,unlink,walk
+from os import getcwd,rename,mkdir,unlink,walk,makedirs
 from os.path import join,exists,isdir,split,isfile,basename,dirname,relpath
 from zipfile import ZipFile
 from tkinter.filedialog import askdirectory
@@ -33,7 +33,7 @@ class _attr_value:
         return self.default
 
     def __str__(self) -> str:
-        return str(self.get())
+        return str(self.get)
     
 class file_manage:
     def __init__(self,work_path:str=getcwd()) -> None:
@@ -228,12 +228,16 @@ class behavior_pack(file_manage):
         self.rm(join(tmp_mcaddon_path))
         self.rename(zip_path,file_name)
     
-    def add_func(self,is_alive:bool=False,is_repeat:bool=False,save_tree:tuple[str]=(""),*condition:Callable):
+    def add_func(self,is_alive:bool=False,is_repeat:bool=False,save_tree:str=None,*condition:Callable):
         '''装饰器'''
         def tmp_1(function:Callable,*args, **kwargs):
             def tmp_2():
                 function(*args, **kwargs)
-                func_path=join(self.function_path,save_tree,f"{function.__name__}.mcfunction")
+                if save_tree:
+                    self.mkdir(join(self.function_path,save_tree),True)
+                    func_path=join(self.function_path,save_tree,f"{function.__name__}.mcfunction")
+                else:
+                    func_path=join(self.function_path,f"{function.__name__}.mcfunction")
                 with open(func_path,"w+",encoding="utf-8") as fp:
                     for command in _TMP_FUNCTION:
                         fp.write(f"{command}\n")

@@ -86,7 +86,7 @@ class _pos_transformation(_position):
     
 class fill(fill_handle):
     '''fill 指令'''
-    def __init__(self,xyz_1:str="~~~",xyz_2:str="~~~",block:block_list=block_list.iron_block,fill_handle:fill_handle=fill_handle.replace) -> None:
+    def __init__(self,xyz_1:str | list[int]="~~~",xyz_2:str | list[int]="~~~",block:block_list=block_list.iron_block,fill_handle:fill_handle=fill_handle.replace) -> None:
         _command_str=""
         for pos in _pos_transformation(xyz_1,xyz_2):
             _command_str+=command_str("fill",pos,block,fill_handle)+'\n'
@@ -98,7 +98,8 @@ class fill(fill_handle):
         
 class setblock(fill_handle):
     '''setblock'''
-    def __init__(self,xyz:str="~~~",block:block_list=block_list.iron_block,fill_handle:fill_handle=fill_handle.replace) -> None:
+    def __init__(self,xyz:str | list[int]="~~~",block:block_list=block_list.iron_block,fill_handle:fill_handle=fill_handle.replace) -> None:
+        xyz=str(_position(xyz))
         self.command_str=command_str("setblock",xyz,block,fill_handle)
         tmp_function.add(self.command_str)
     
@@ -108,7 +109,10 @@ class setblock(fill_handle):
     
 class clone(clone_handle):
     '''clone'''
-    def __init__(self,xyz_1:str="~~~",xyz_2:str="~~~",xyz_pos="~~~",handle:clone_handle=clone_handle.replace.normal()) -> None:
+    def __init__(self,xyz_1:str | list[int]="~~~",xyz_2:str | list[int]="~~~",xyz_pos:str | list[int]="~~~",handle:clone_handle=clone_handle.replace.normal()) -> None:
+        xyz_1=str(_position(xyz_1))
+        xyz_2=str(_position(xyz_2))
+        xyz_pos=str(_position(xyz_pos))
         self.command_str=command_str("clone",xyz_1,xyz_2,xyz_pos,handle)
         tmp_function.add(self.command_str)
     

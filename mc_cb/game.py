@@ -4,7 +4,7 @@
 from re import findall
 
 class _position:
-    def __init__(self,pos:str | list[tuple[str,str]]) -> None:
+    def __init__(self,pos:str | list[tuple[str,str]] | list[int]) -> None:
         self.pos=self.real_pos(pos)
     
     @staticmethod
@@ -24,27 +24,69 @@ class _position:
         
     @staticmethod
     def real_pos(pos):
-        if isinstance(pos,list):
-            return pos
+        if isinstance(pos,list) or isinstance(pos,tuple):
+            if isinstance(pos[0],tuple):
+                return pos
+            return _position.return_pos(pos,[("",""),("",""),("","")])
         pos_rule="([~,^]?)([-,+]?\d*)"
         postions=findall(pos_rule,pos)
         postions=[(i,j) for i,j in postions if i != "" or j !=""]
         return postions
     
     @staticmethod
-    def parse_pos(pos:list[tuple[str,str]]) ->list[int]:
+    def parse_pos(pos:list[tuple[str,str]] | str) ->list[int]:
         '''解析坐标（并非真实坐标） -> [x,y,z]'''
+        if isinstance(pos,str):
+            pos = _position.real_pos(pos)
         if isinstance(pos[0],int):
             return pos
         return [int(j) if j != "" else 0 for i,j in pos]
 
-class chunk(_position):
-    def __init__(self,pos:str | list[tuple[str,str]] | list[int],_chunk_value:int=16,_point_0:list[int]=[0,0]) -> None:
+    def __str__(self) -> str:
+        postion=["".join(i) for i in self.pos]
+        return " ".join(postion)
+
+
+class _position_list:
+    def __init__(self,pos_1,pos_2) -> None:
+        self.pos_1=pos_1
+        self.pos_2=pos_2
+        self._index=0
+        self.min_x=min(pos_1[0],pos_2[0])
+        self.min_y=min(pos_1[1],pos_2[1])
+        self.min_z=min(pos_1[2],pos_2[2])
+        self.max_x=max(pos_1[0],pos_2[0])
+        self.max_y=max(pos_1[1],pos_2[1])
+        self.max_z=max(pos_1[2],pos_2[2])
+
+        self._positions_list=[]
+        lines=[]
+        surface=[]
+        for y in range(self.min_y,self.max_y+1):
+            for i in range(self.min_x,self.max_x+1):
+                for j in range(self.min_z,self.max_z+1):
+                    lines.append((i,y,j))
+                surface.append(lines)
+                lines=[]
+            self._positions_list.append(surface)
+            surface=[]
+        self.positions=[m for i in self._positions_list for j in i for m in j]
+    
+    def get_position(self,x_index=0,y_index=0,z_index=0):
+        return self._positions_list[y_index][z_index][x_index]
+
+    def get_positions_list(self,mode:str="y",index:int=0):
+        if mode == "y":
+            return [i for i in self._positions_list[index] for j in i]
+
+class chunk(_position,_position_list):
+    def __init__(self,pos:str | list[tuple[str,str]] | list[int],_chunk_len:int=16,_point_0:list[int]=[0,0]) -> None:
         '''- pos:坐标
         - _chunk_value:想要分割的区块大小'''
-        self.pos=self.parse_pos(self.real_pos(pos))
-        self._value=_chunk_value
+        self.pos=self.parse_pos(pos)
+        self._value=_chunk_len
         self._point_0=_point_0
+        _position_list.__init__(self, *self.chunk_pos)
 
     @property
     def chunk_pos(self) -> tuple[tuple[int],tuple[int]]:
@@ -53,20 +95,22 @@ class chunk(_position):
         y=self.pos[1]
         z=self.pos[2]
         value=self._value
-        min_x=x-(x%value) if x >=0 else (-x)%value-1+x
-        min_z=z-(z%value) if z >=0 else (-z)%value-1+z
-        max_x=min_x+value-1 if min_x >= 0 else min_x-value-1
-        max_z=min_z+value-1 if min_z >= 0 else min_z-value-1
+        x_0=self._point_0[0]
+        z_0=self._point_0[1]
+        min_x=x-(x%value)+x_0 if x >= x_0 else (x_0-x)%value-1+x
+        min_z=z-(z%value)+z_0 if z >= z_0 else (z_0-z)%value-1+z
+        max_x=min_x+value-1 if min_x >= x_0 else min_x-value+1
+        max_z=min_z+value-1 if min_z >= z_0 else min_z-value+1
         min_pos=(min_x,y,min_z)
         max_pos=(max_x,y,max_z)
         return min_pos,max_pos
-    
+
 class Map(_position):
     '''地图'''
     def __init__(self,pos:str | list[tuple[str,str]] | list[int],level:int=0) -> None:
         '''- pos:坐标
         - level:地图等级 0-4'''
-        self.pos=self.parse_pos(self.real_pos(pos))
+        self.pos=self.parse_pos(pos)
         if level in range(5):
             self.level=level
         else:
@@ -74,6 +118,7 @@ class Map(_position):
     
     @property
     def map_pos(self):
-        chunk_value=4*2**self.level
-        min_pos,max_pos = chunk(self.pos,chunk_value).chunk_pos
+        chunk_sum=2**(self.level+3)
+        chunk_len=16*chunk_sum
+        return chunk(self.pos,chunk_len,[-8*chunk_sum,-8*chunk_sum]).chunk_pos
         
