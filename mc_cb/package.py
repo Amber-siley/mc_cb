@@ -1,39 +1,13 @@
-from os import getcwd,rename,mkdir,unlink,walk,makedirs
-from os.path import join,exists,isdir,split,isfile,basename,dirname,relpath
+from os import getcwd,rename,mkdir,unlink,walk
+from os.path import join,exists,isdir,split,isfile,basename,relpath
 from zipfile import ZipFile
-from tkinter.filedialog import askdirectory
 from json import dumps
 from uuid import uuid1
-from typing import Callable,Any
-from .define import _TMP_FUNCTION
+from typing import Callable
 from shutil import make_archive,move,copy,copytree,rmtree
 from zipfile import ZipFile
-
-class _attr_value:
-    '''通过index进行设置'''
-    def __init__(self,attr:str,format:Callable,default,inherited:bool = False) -> None:
-        '''- attr 属性
-        - format 通过__getitem__获取参数进行处理的函数
-        - default 默认值
-        - inherited 是否继承最后一次设置的值'''
-        self.attr=attr
-        self.getitem=format
-        self.default=default
-        self.inherited=inherited
-        self.final_value=None
-    
-    def __getitem__(self,key=None):
-        self.final_value=self.getitem(key)
-        return self.getitem(key)
-
-    @property
-    def get(self) -> Any:
-        if self.inherited and self.final_value:
-            return self.final_value
-        return self.default
-
-    def __str__(self) -> str:
-        return str(self.get)
+from .define import _TMP_FUNCTION
+from .tools import _attr_value,tmp_function
     
 class file_manage:
     def __init__(self,work_path:str=getcwd()) -> None:
@@ -246,31 +220,9 @@ class behavior_pack(file_manage):
             return tmp_2
         return tmp_1
     
-class tmp_function:
-    '''暂时存储指令列表'''
-    global _TMP_FUNCTION
-    @staticmethod
-    def add(command_str:str):
-        '''添加'''
-        _TMP_FUNCTION.append(command_str)
-        
-    @staticmethod
-    def cls():
-        '''清除'''
-        _TMP_FUNCTION.clear()
-    
 class tick:
     tick={"values":[]}
     
     def add(function):
         def add_1(*args, **kwargs):
             ...
-    
-def command_str(*commands):
-    '''按照给与的字符串生成指令'''
-    return_data=""
-    max=len(commands)
-    for index,tmp in enumerate(commands):
-        return_data+=str(tmp)
-        if index+1<max: return_data+=" "
-    return return_data
