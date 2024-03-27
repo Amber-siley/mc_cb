@@ -76,9 +76,17 @@ class _position_list:
         return self._positions_list[y_index][z_index][x_index]
 
     def get_positions_list(self,mode:str="y",index:int=0):
-        if mode == "y":
-            return [i for i in self._positions_list[index] for j in i]
-
+        '''mode:
+        - y or face
+        - z or cols
+        - x or line'''
+        if mode == "y" or mode == "face":
+            return [j for i in self._positions_list[index] for j in i]
+        elif mode == "z" or mode == "cols":
+            return [j[index] for i in self._positions_list for j in i]
+        elif mode == "x" or mode == "line":
+            return [m for i in self._positions_list for _index,m in enumerate(i) if _index == index]
+        
 class chunk(_position,_position_list):
     def __init__(self,pos:str | list[tuple[str,str]] | list[int],_chunk_len:int=16,_point_0:list[int]=[0,0]) -> None:
         '''- pos:坐标
@@ -121,4 +129,5 @@ class Map(_position):
         chunk_sum=2**(self.level+3)
         chunk_len=16*chunk_sum
         return chunk(self.pos,chunk_len,[-8*chunk_sum,-8*chunk_sum]).chunk_pos
-        
+
+    
