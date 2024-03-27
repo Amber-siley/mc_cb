@@ -1,7 +1,10 @@
 from typing import Callable,Any
 from math import sqrt
-from .define import _TMP_FUNCTION
 from numba import jit
+from PIL import Image
+import numpy as np
+
+from .define import _TMP_FUNCTION
 
 class _attr_value:
     '''通过index进行设置'''
@@ -28,15 +31,6 @@ class _attr_value:
 
     def __str__(self) -> str:
         return str(self.get)
-    
-def command_str(*commands):
-    '''按照给与的字符串生成指令'''
-    return_data=""
-    max=len(commands)
-    for index,tmp in enumerate(commands):
-        return_data+=str(tmp)
-        if index+1<max: return_data+=" "
-    return return_data
 
 class tmp_function:
     '''暂时存储指令列表'''
@@ -51,6 +45,35 @@ class tmp_function:
         '''清除'''
         _TMP_FUNCTION.clear()
 
+class cb_image:
+    '''对图像进行处理'''
+    def __init__(self,file:str,width:int=None,height:int=None,quality:int=5) -> None:
+        self.file=file
+        self.png=Image.open(file)
+        self.png.convert("RGB")
+        png=self.png
+        if width and height:
+            png=png.resize((width,height),quality)
+        elif width:
+            height=int(png.size[1]*(width/png.size[0]))
+            png=png.resize((width,height),quality)
+        elif height:
+            width=int(png.size[0]*(height/png.size[1]))
+            png=png.resize((width,height),quality)
+        self.png=png
+        self.width,self.height=png.size
+        self.png_data=png.getdata()
+        self.RGB=np.asarray(self.png_data).reshape(self.height,self.width,3)
+    
+def command_str(*commands):
+    '''按照给与的字符串生成指令'''
+    return_data=""
+    max=len(commands)
+    for index,tmp in enumerate(commands):
+        return_data+=str(tmp)
+        if index+1<max: return_data+=" "
+    return return_data
+
 @jit(nopython=True,cache=True)
 def _color_distance_formula(R_mean,R,G,B):
     return sqrt((2+R_mean/156)*(R**2)+4*(G**2)+(2+(256-R_mean)/256)*(B**2))
@@ -60,3 +83,4 @@ def color_distance(rgb_1:tuple[int] | list[int],rgb_2:tuple[int] | list[int]):
     R_mean=(rgb_1[0]+rgb_2[0])/2
     R,G,B=[rgb_1[i]-rgb_2[i] for i in range(3)]
     return _color_distance_formula(R_mean,R,G,B)
+
