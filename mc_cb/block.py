@@ -8,9 +8,9 @@
 from .variable import block_list,fill_handle,clone_handle
 from .define import _TMP_POS
 from .tools import command_str,tmp_function
-from .game import _position
+from .game import position_list,position
 
-class _pos_transformation(_position):
+class _pos_transformation(position_list):
     '''坐标变换，使方块操作更加优雅'''
     def __init__(self,xyz_1:str | list[tuple[str,str]],xyz_2:str | list[tuple[str,str]]) -> None:
         self.xyz_1=self.real_pos(xyz_1)
@@ -36,8 +36,9 @@ class _pos_transformation(_position):
         else:
             self._index=0
             raise StopIteration
-        
-    def count(self,jump_check=False) ->int:
+    
+    @property
+    def count(self) ->int:
         xyz_1_type=self.pos_type(self.xyz_1)
         xyz_2_type=self.pos_type(self.xyz_2)
         if xyz_1_type != xyz_2_type or xyz_1_type == "unknown":
@@ -50,7 +51,7 @@ class _pos_transformation(_position):
     
     def split_pos(self,pos_1:list[tuple[str,str]],pos_2:list[tuple[str,str]]):
         global _TMP_POS
-        if self.count() <= 32768:
+        if self.count <= 32768:
             _TMP_POS.append(self.__str__())
             return True
         A=pos_1
@@ -65,13 +66,6 @@ class _pos_transformation(_position):
         D=self.return_pos(D,A)
         _pos_transformation(A,C).split_pos(A,C)
         _pos_transformation(D,B).split_pos(D,B)
-               
-    def vector(self,pos_1:list[tuple[str,str]],pos_2:list[tuple[str,str]]) -> list[int]:
-        '''向量坐标'''
-        pos_1=self.parse_pos(pos_1)
-        pos_2=self.parse_pos(pos_2)
-        AB=[pos_2[index]-value_1 for index,value_1 in enumerate(pos_1)]
-        return AB
     
     def max(self,pos:list[tuple[str,str]]):
         pos=self.parse_pos(pos)
@@ -99,7 +93,7 @@ class fill(fill_handle):
 class setblock(fill_handle):
     '''setblock'''
     def __init__(self,xyz:str | list[int]="~~~",block:block_list=block_list.iron_block,fill_handle:fill_handle=fill_handle.replace) -> None:
-        xyz=str(_position(xyz))
+        xyz=str(position(xyz))
         self.command_str=command_str("setblock",xyz,block,fill_handle)
         tmp_function.add(self.command_str)
     
@@ -110,9 +104,9 @@ class setblock(fill_handle):
 class clone(clone_handle):
     '''clone'''
     def __init__(self,xyz_1:str | list[int]="~~~",xyz_2:str | list[int]="~~~",xyz_pos:str | list[int]="~~~",handle:clone_handle=clone_handle.replace.normal()) -> None:
-        xyz_1=str(_position(xyz_1))
-        xyz_2=str(_position(xyz_2))
-        xyz_pos=str(_position(xyz_pos))
+        xyz_1=str(position(xyz_1))
+        xyz_2=str(position(xyz_2))
+        xyz_pos=str(position(xyz_pos))
         self.command_str=command_str("clone",xyz_1,xyz_2,xyz_pos,handle)
         tmp_function.add(self.command_str)
     

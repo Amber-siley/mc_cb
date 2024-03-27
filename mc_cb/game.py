@@ -3,7 +3,7 @@
 """
 from re import findall
 
-class _position:
+class position:
     def __init__(self,pos:str | list[tuple[str,str]] | list[int]) -> None:
         self.pos=self.real_pos(pos)
     
@@ -27,7 +27,7 @@ class _position:
         if isinstance(pos,list) or isinstance(pos,tuple):
             if isinstance(pos[0],tuple):
                 return pos
-            return _position.return_pos(pos,[("",""),("",""),("","")])
+            return position.return_pos(pos,[("",""),("",""),("","")])
         pos_rule="([~,^]?)([-,+]?\d*)"
         postions=findall(pos_rule,pos)
         postions=[(i,j) for i,j in postions if i != "" or j !=""]
@@ -37,7 +37,7 @@ class _position:
     def parse_pos(pos:list[tuple[str,str]] | str) ->list[int]:
         '''解析坐标（并非真实坐标） -> [x,y,z]'''
         if isinstance(pos,str):
-            pos = _position.real_pos(pos)
+            pos = position.real_pos(pos)
         if isinstance(pos[0],int):
             return pos
         return [int(j) if j != "" else 0 for i,j in pos]
@@ -46,8 +46,7 @@ class _position:
         postion=["".join(i) for i in self.pos]
         return " ".join(postion)
 
-
-class _position_list:
+class position_list(position):
     def __init__(self,pos_1,pos_2) -> None:
         self.pos_1=pos_1
         self.pos_2=pos_2
@@ -86,15 +85,29 @@ class _position_list:
             return [j[index] for i in self._positions_list for j in i]
         elif mode == "x" or mode == "line":
             return [m for i in self._positions_list for _index,m in enumerate(i) if _index == index]
+    
+    def vector(self,pos_1:list[tuple[str,str]],pos_2:list[tuple[str,str]]) -> list[int]:
+        '''向量坐标'''
+        pos_1=self.parse_pos(pos_1)
+        pos_2=self.parse_pos(pos_2)
+        AB=[pos_2[index]-value_1 for index,value_1 in enumerate(pos_1)]
+        return AB
+    
+    @property
+    def count(self):
+        AB=self.vector(self.pos_1,self.pos_2)
+        AB=[i+1 if i>=0 else i-1 for i in AB]
+        count_AB=abs(AB[0]*AB[1]*AB[2])
+        return count_AB
         
-class chunk(_position,_position_list):
+class chunk(position_list):
     def __init__(self,pos:str | list[tuple[str,str]] | list[int],_chunk_len:int=16,_point_0:list[int]=[0,0]) -> None:
         '''- pos:坐标
         - _chunk_value:想要分割的区块大小'''
         self.pos=self.parse_pos(pos)
         self._value=_chunk_len
         self._point_0=_point_0
-        _position_list.__init__(self, *self.chunk_pos)
+        position_list.__init__(self, *self.chunk_pos)
 
     @property
     def chunk_pos(self) -> tuple[tuple[int],tuple[int]]:
@@ -113,7 +126,7 @@ class chunk(_position,_position_list):
         max_pos=(max_x,y,max_z)
         return min_pos,max_pos
 
-class Map(_position):
+class Map(position):
     '''地图'''
     def __init__(self,pos:str | list[tuple[str,str]] | list[int],level:int=0) -> None:
         '''- pos:坐标
