@@ -207,18 +207,33 @@ class behavior_pack(file_manage):
         def tmp_1(function:Callable,*args, **kwargs):
             def tmp_2():
                 function(*args, **kwargs)
-                if save_tree:
-                    self.mkdir(join(self.function_path,save_tree),True)
-                    func_path=join(self.function_path,save_tree,f"{function.__name__}.mcfunction")
-                else:
-                    func_path=join(self.function_path,f"{function.__name__}.mcfunction")
-                with open(func_path,"w+",encoding="utf-8") as fp:
-                    for command in _TMP_FUNCTION:
-                        fp.write(f"{command}\n")
-                    tmp_function.cls()
+                self.write_function(save_tree,function.__name__)
+                tmp_function.cls()
             tmp_2()
             return tmp_2
         return tmp_1
+    
+    def write_function(self,save_tree:str = None,func_name:str = "test",addon_str:str="",index:int=0):
+        if save_tree:
+            self.mkdir(join(self.function_path,save_tree),True)
+            func_save_tree=join(self.function_path,save_tree)
+        else:
+            func_save_tree=self.function_path
+        func_path=join(func_save_tree,f"{func_name}{addon_str}.mcfunction")
+        fp = open(func_path,"w+",encoding="utf-8")
+        global _TMP_FUNCTION
+        for i,command in enumerate(_TMP_FUNCTION):
+            if i < 9999:
+                fp.write(f"{command}\n")
+            else:
+                addon_str = f"_{str(index)}"
+                fp.write(f"function {save_tree}/{func_name}{addon_str}")
+                fp.close()
+                _TMP_FUNCTION=_TMP_FUNCTION[9999:]
+                index += 1
+                self.write_function(save_tree,func_name,addon_str,index)
+                break
+    
     
 class tick:
     tick={"values":[]}

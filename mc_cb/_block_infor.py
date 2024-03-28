@@ -19,9 +19,9 @@ class _block_name:
             option=options.optional[index]
             attr=options.attr
             if isinstance(option,bool) or isinstance(option,int):
-                re_str=re_str+f'''"{attr}"={option}'''
+                re_str=re_str+f'''"{attr}":{option}'''
             else:
-                re_str=re_str+f'''"{attr}"="{option}"'''
+                re_str=re_str+f'''"{attr}":"{option}"'''
             if id+1 != max:  re_str=re_str+","
         re_str=f'''[{re_str}]'''
         return f'''{self._name} {re_str}'''
@@ -38,9 +38,9 @@ class _get_block_attr:
         '''返回mc指令方块属性部分的字符串类型'''
         option=self.optional[index]
         if isinstance(option,bool) or isinstance(option,int):
-            attr_park=f'''["{self.attr}"={option}]'''
+            attr_park=f'''["{self.attr}":{option}]'''
         else:
-            attr_park=f'''["{self.attr}"="{option}"]'''
+            attr_park=f'''["{self.attr}":"{option}"]'''
         return f'''{self.block} {attr_park}'''
 
 class _block_list:
@@ -362,6 +362,38 @@ class _block_list:
     '''木质台阶'''
     stained_hardened_clay="stained_hardened_clay"
     '''染色陶瓦'''
+    white_terracotta="white_terracotta"
+    '''白色陶瓦'''
+    orange_terracotta="orange_terracotta"
+    '''橙色陶瓦'''
+    magenta_terracotta="magenta_terracotta"
+    '''品红色陶瓦'''
+    light_blue_terracotta="light_blue_terracotta"
+    '''淡蓝色陶瓦'''
+    yellow_terracotta="yellow_terracotta"
+    '''黄色陶瓦'''
+    lime_terracotta="lime_terracotta"
+    '''黄绿色陶瓦'''
+    pink_terracotta="pink_terracotta"
+    '''粉红色陶瓦'''
+    gray_terracotta="gray_terracotta"
+    '''灰色陶瓦'''
+    light_gray_terracotta="light_gray_terracotta"
+    '''淡灰色陶瓦'''
+    cyan_terracotta="cyan_terracotta"
+    '''青色陶瓦'''
+    purple_terracotta="purple_terracotta"
+    '''紫色陶瓦'''
+    blue_terracotta="blue_terracotta"
+    '''蓝色陶瓦'''
+    brown_terracotta="brown_terracotta"
+    '''棕色陶瓦'''
+    green_terracotta="green_terracotta"
+    '''绿色陶瓦'''
+    red_terracotta="red_terracotta"
+    '''红色陶瓦'''
+    black_terracotta="black_terracotta"
+    '''黑色陶瓦'''
     stained_glass_pane="stained_glass_pane"
     '''染色玻璃板'''
     leaves2="leaves2"
@@ -2046,8 +2078,84 @@ class block_list(_block_list):
             - block_face 朝向 上下东南西北 0-5'''
             return self._command_attr_park(facing_direction=facing_direction,block_face=block_face)
     
+    class _mushroom_block(_block_name):
+        def __init__(self, name) -> None:   
+            super().__init__(name)
+            self.huge_mushroom_bits=_get_block_attr(_block_status.huge_mushroom_bits)
+            '''方块朝向 1-15'''
+        def set_attr(self,huge_mushroom_bits:int=None):
+            return self._command_attr_park(huge_mushroom_bits=huge_mushroom_bits)
+        
     anvil=_anvil(_block_list.anvil)
     '''铁砧'''
     amethyst_cluster=_amethyst_cluster(_block_list.amethyst_cluster)
     '''紫水晶簇'''
+    brown_mushroom_block=_mushroom_block(_block_list.brown_mushroom_block)
+    '''棕色蘑菇块'''
+    red_mushroom_block=_mushroom_block(_block_list.red_mushroom_block)
+    '''红色蘑菇块'''
     
+color_block_62 = {
+    block_list.glass: (0, 0, 0),
+    block_list.slime: (127, 178, 56),
+    block_list.glowstone: (247, 233, 163),
+    block_list.brown_mushroom_block.huge_mushroom_bits[15]: (199, 199, 199),
+    block_list.redstone_block: (255, 0, 0),
+    block_list.blue_ice: (160, 160, 255),
+    block_list.iron_block: (167, 167, 167),
+    block_list.leaves: (0, 124, 0),
+    block_list.white_wool: (255, 255, 255),
+    block_list.clay: (164, 168, 184),
+    block_list.dirt: (151, 109, 77),
+    block_list.cobblestone: (112, 112, 112),
+    block_list.water: (64, 64, 255),
+    block_list.planks: (143, 119, 72),
+    block_list.quartz_block: (255, 252, 245),
+    block_list.orange_wool: (216, 127, 51),
+    block_list.magenta_wool: (178, 76, 216),
+    block_list.light_blue_wool: (102, 153, 216),
+    block_list.yellow_wool: (229, 229, 51),
+    block_list.lime_wool: (127, 204, 25),
+    block_list.pink_wool: (242, 127, 165),
+    block_list.gray_wool: (76, 76, 76),
+    block_list.light_gray_wool: (153, 153, 153),
+    block_list.cyan_wool: (76, 127, 153),
+    block_list.purple_wool: (127, 63, 178),
+    block_list.blue_wool: (51, 76, 178),
+    block_list.brown_wool: (102, 76, 51),
+    block_list.green_wool: (102, 127, 51),
+    block_list.red_wool: (153, 51, 51),
+    block_list.black_wool: (25, 25, 25),
+    block_list.gold_block: (250, 238, 77),
+    block_list.diamond_block: (92, 219, 213),
+    block_list.lapis_block: (74, 128, 255),
+    block_list.emerald_block: (0, 217, 58),
+    block_list.podzol: (129, 86, 4),
+    block_list.netherrack: (112, 2, 0),
+    block_list.cherry_planks: (209, 177, 161),
+    block_list.brown_terracotta: (159, 82, 36),
+    block_list.magenta_terracotta: (149, 87, 108),
+    block_list.light_blue_terracotta: (112, 108, 138),
+    block_list.yellow_terracotta: (186, 133, 36),
+    block_list.lime_terracotta: (103, 117, 53),
+    block_list.pink_terracotta: (160, 77, 78),
+    block_list.gray_terracotta: (57, 41, 35),
+    block_list.light_gray_terracotta: (135, 107, 98),
+    block_list.cyan_terracotta: (87, 92, 92),
+    block_list.purple_terracotta: (122, 73, 88),
+    block_list.blue_terracotta: (76, 62, 92),
+    block_list.brown_terracotta: (76, 50, 35),
+    block_list.green_terracotta: (76, 82, 42),
+    block_list.red_terracotta: (142, 60, 46),
+    block_list.black_terracotta: (37, 22, 16),
+    block_list.crimson_nylium: (189, 48, 49),
+    block_list.crimson_planks: (148, 63, 97),
+    block_list.crimson_hyphae: (92, 25, 29),
+    block_list.warped_nylium: (22, 126, 134),
+    block_list.warped_planks: (58, 142, 140),
+    block_list.warped_hyphae: (86, 44, 62),
+    block_list.warped_wart_block: (20, 180, 133),
+    block_list.deepslate: (100, 100, 100),
+    block_list.raw_iron_block: (216, 175, 147),
+    block_list.verdant_froglight: (127, 167, 150)
+}
