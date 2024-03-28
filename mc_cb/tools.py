@@ -1,5 +1,7 @@
 from typing import Callable,Any
 from math import sqrt
+
+import PIL.JpegImagePlugin
 from numba import jit
 from PIL import Image
 import numpy as np
@@ -47,9 +49,12 @@ class tmp_function:
 
 class cb_image:
     '''对图像进行处理'''
-    def __init__(self,file:str,width:int=None,height:int=None,quality:int=5) -> None:
+    def __init__(self,file:str | PIL.JpegImagePlugin.JpegImageFile,width:int=None,height:int=None,quality:int=5) -> None:
         self.file=file
-        self.png=Image.open(file)
+        if isinstance(self.file,str):
+            self.png=Image.open(file)
+        else:
+            self.png=file
         self.png.convert("RGB")
         png=self.png
         if width and height:
