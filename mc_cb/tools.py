@@ -36,17 +36,28 @@ class _attr_value:
 
 class tmp_function:
     '''暂时存储指令列表'''
-    global _TMP_FUNCTION
     @staticmethod
     def add(command_str:str):
         '''添加'''
+        global _TMP_FUNCTION
         _TMP_FUNCTION.append(command_str)
         
     @staticmethod
     def cls():
         '''清除'''
+        global _TMP_FUNCTION
         _TMP_FUNCTION.clear()
 
+    @staticmethod
+    def cut(start:int=None,stop:int=None):
+        global _TMP_FUNCTION
+        if start and stop == None:
+            del _TMP_FUNCTION[:start]
+        elif start == None and stop:
+            del _TMP_FUNCTION[stop:]
+        else:
+            raise ValueError("only on variable")
+    
 class cb_image:
     '''对图像进行处理'''
     def __init__(self,file:str | PIL.JpegImagePlugin.JpegImageFile,width:int=None,height:int=None,quality:int=5) -> None:

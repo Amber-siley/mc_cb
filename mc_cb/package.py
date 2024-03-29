@@ -221,7 +221,6 @@ class behavior_pack(file_manage):
             func_save_tree=self.function_path
         func_path=join(func_save_tree,f"{func_name}{addon_str}.mcfunction")
         fp = open(func_path,"w+",encoding="utf-8")
-        global _TMP_FUNCTION
         for i,command in enumerate(_TMP_FUNCTION):
             if i < 9999:
                 fp.write(f"{command}\n")
@@ -229,11 +228,11 @@ class behavior_pack(file_manage):
                 addon_str = f"_{str(index)}"
                 fp.write(f"function {save_tree}/{func_name}{addon_str}")
                 fp.close()
-                _TMP_FUNCTION=_TMP_FUNCTION[9999:]
+                # _TMP_FUNCTION=_TMP_FUNCTION[9999:]
+                tmp_function.cut(9999)
                 index += 1
                 self.write_function(save_tree,func_name,addon_str,index)
                 break
-    
     
 class tick:
     tick={"values":[]}
