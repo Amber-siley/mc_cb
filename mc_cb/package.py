@@ -1,13 +1,16 @@
 from os import getcwd,rename,mkdir,unlink,walk
 from os.path import join,exists,isdir,split,isfile,basename,relpath
 from zipfile import ZipFile
-from json import dumps
+from json import dumps,loads
 from uuid import uuid1
 from typing import Callable
 from shutil import make_archive,move,copy,copytree,rmtree
 from zipfile import ZipFile
+from math import ceil
+
 from .define import _TMP_FUNCTION
 from .tools import _attr_value,tmp_function
+from .commands import execute,scoreboard,Function,schedule
     
 class file_manage:
     def __init__(self,work_path:str=getcwd()) -> None:
@@ -104,15 +107,22 @@ class json_manage:
         self.file_path=file_path
         
     def write(self,content:dict | list,exist:bool=False):
-        if exist:
-            is_live=exists(self.file_path)
+        is_live=exists(self.file_path)
+        if is_live and exist:
+            run = True
+        elif not is_live:
+            run = True
         else:
-            is_live=False
-        if not is_live:
+            run = False
+        if run:
             with open(self.file_path,"w",encoding='utf-8') as fp:
                 content=dumps(content,indent=4)
                 fp.write(content)
 
+    def read(self):
+        with open(self.file_path,mode="r",encoding="utf-8") as fp:
+            return loads(fp.read())
+        
 class _manifest:
     '''附加包主描述文件
     - format_version
@@ -127,7 +137,7 @@ class _manifest:
         uuid=str(uuid1())
         version=_attr_value("",lambda _list:_list,[1,0,0],True)
         '''版本号 Use: \n >>> version[1,2,4] #版本号1.2.4'''
-        min_engine_version=_attr_value("",lambda _list:_list,[1,16,0],True)
+        min_engine_version=_attr_value("",lambda _list:_list,[1,20,0],True)
         '''游戏最低版本 Use: \n >>> min_engine_version[1,16,0] #最低版本1,16,0'''
     
     class _manifest_modules:
@@ -189,7 +199,7 @@ class behavior_pack(file_manage):
         self.touch('pack_icon.png',self.behavior_path,True)
         self.manifest_path=join(self.behavior_path,'manifest.json')
         manifest_json=json_manage(self.manifest_path)
-        manifest_json.write(self.MANIFEST._manifest_dict,True)
+        manifest_json.write(self.MANIFEST._manifest_dict)
         return self.behavior_path
 
     def build_mcaddon(self):
@@ -202,41 +212,98 @@ class behavior_pack(file_manage):
         self.rm(join(tmp_mcaddon_path))
         self.rename(zip_path,file_name)
     
-    def add_func(self,is_alive:bool=False,is_repeat:bool=False,save_tree:str=None,*condition:Callable):
+    def add_func(self,is_alive:bool=False,is_repeat:bool=False,save_tree:str=None,func_name=True,opertimizing:bool=False,*condition:Callable):
         '''装饰器'''
         def tmp_1(function:Callable,*args, **kwargs):
+            name=func_name
+            if func_name:
+                name=function.__name__
+            if is_repeat:
+                self.tick(name)
             def tmp_2():
                 function(*args, **kwargs)
-                self.write_function(save_tree,function.__name__)
+                self.write_function(save_tree,name,opertimizing=opertimizing)
                 tmp_function.cls()
             tmp_2()
             return tmp_2
         return tmp_1
     
-    def write_function(self,save_tree:str = None,func_name:str = "test",addon_str:str="",index:int=0):
+    def write_function(self,save_tree:str = None,func_name:str = "test",addon_str:str="",index:int=-1,first_run:bool=True,opertimizing:bool=False):
         if save_tree:
             self.mkdir(join(self.function_path,save_tree),True)
+            #函数文件的保存路径
             func_save_tree=join(self.function_path,save_tree)
+            #执行函数的名称
+            function_name = f"{save_tree}/{func_name}{addon_str}"
         else:
             func_save_tree=self.function_path
+            function_name = f"{func_name}{addon_str}"
+        #函数文件的路径
+        if index != -1:
+            addon_str = f"_{str(index)}"
+        index += 1
         func_path=join(func_save_tree,f"{func_name}{addon_str}.mcfunction")
         fp = open(func_path,"w+",encoding="utf-8")
-        for i,command in enumerate(_TMP_FUNCTION):
-            if i < 9999:
-                fp.write(f"{command}\n")
+        
+        def write_now(command):
+            fp.write("\n")
+            if isinstance(command,str):
+                fp.write(command)
             else:
-                addon_str = f"_{str(index)}"
-                fp.write(f"function {save_tree}/{func_name}{addon_str}")
+                fp.write(command.command_str)
+            tmp_function.Del(-1)
+            
+        if len(_TMP_FUNCTION) <= 10000:
+            fp.write("\n".join(_TMP_FUNCTION))
+            if not first_run and opertimizing:
+                write_now(scoreboard(scoreboard.player.add(scoreboard.target("@s"),func_name,1)))
+        else:
+            if first_run and opertimizing:
+                tmp_function.Tmp_storage()
+                name=func_name
+                scoreboard(scoreboard.obj.add(name,f"{name}_Display"))
+                scoreboard(scoreboard.obj.setdisplay.sidebar(name))
+                scoreboard(scoreboard.player.Set(scoreboard.target("@s"),name,0))
+                self.write_function(save_tree=save_tree,func_name=func_name)
+                tmp_function.cls()
+                tmp_function.Tmp_storage()
+                index_len=ceil(len(_TMP_FUNCTION)/9997)
+                tmp_function.Tmp_storage()
+                self.SystemRunFunction(function_name,f"{func_name}",index_len)
+                tmp_function.Tmp_storage()
+                self.write_function(save_tree,func_name,addon_str,index,False)
+            elif opertimizing:
+                fp.write("\n".join(_TMP_FUNCTION[:9990]))
+                write_now(scoreboard(scoreboard.player.add(scoreboard.target("@s"),func_name,1)))
+                tmp_function.cut(9990)
+            # write_now(schedule(schedule.handle.cube(),f"{function_name}{addon_str}"))
                 fp.close()
-                # _TMP_FUNCTION=_TMP_FUNCTION[9999:]
-                tmp_function.cut(9999)
+                self.write_function(save_tree,func_name,addon_str,index,False)
+            else:
+                fp.write("\n".join(_TMP_FUNCTION[:10000]))
+                fp.close()
+                tmp_function.cut(10000)
                 index += 1
                 self.write_function(save_tree,func_name,addon_str,index)
-                break
+            return 0
     
-class tick:
-    tick={"values":[]}
+    def tick(self,*adds:str):
+        tick_path=join(self.function_path,"tick.json")
+        if exists(tick_path):
+            tick=json_manage(tick_path).read()
+            functions=tick["values"]
+        else:
+            json_manage(tick_path).write({"values":[]})
+            functions=[]
+            tick={"values":[]}
+        for i in adds:
+            functions.append(i)
+        tick["values"]=functions
+        json_manage(tick_path).write(tick,exist=True)
     
-    def add(function):
-        def add_1(*args, **kwargs):
-            ...
+    def SystemRunFunction(self,function:str,name,len_index:int):
+        @self.add_func(is_repeat=True,func_name=name)
+        def RunFunctionsManage():
+            functions=[f"{function}_{i}" for i in range(len_index)]
+            for i in range(len(functions)):
+                execute(Function(functions[i]),execute.As("@s",execute.As.score[name,i]))

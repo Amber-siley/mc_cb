@@ -6,7 +6,7 @@ from numba import jit
 from PIL import Image
 import numpy as np
 
-from .define import _TMP_FUNCTION
+from .define import _TMP_FUNCTION,_TMP_STORAGE_FUNCTION_1,_TMP_STORAGE_FUNCTION_2
 
 class _attr_value:
     '''通过index进行设置'''
@@ -22,8 +22,12 @@ class _attr_value:
         self.final_value=None
     
     def __getitem__(self,key=None):
-        self.final_value=self.getitem(key)
-        return self.getitem(key)
+        if isinstance(key,tuple):
+            self.final_value=self.getitem(*key)
+            return _attr_value(self.attr,lambda x:x,self.getitem(*key))
+        else:
+            self.final_value=self.getitem(key)
+            return _attr_value(self.attr,lambda x:x,self.getitem(key))
 
     @property
     def get(self) -> Any:
@@ -57,6 +61,21 @@ class tmp_function:
             del _TMP_FUNCTION[stop:]
         else:
             raise ValueError("only on variable")
+    
+    @staticmethod
+    def Del(index:int):
+        global _TMP_FUNCTION
+        del _TMP_FUNCTION[index]
+    
+    @staticmethod
+    def Tmp_storage():
+        global _TMP_FUNCTION,_TMP_STORAGE_FUNCTION_1,_TMP_STORAGE_FUNCTION_2
+        _TMP_STORAGE_FUNCTION_2.clear()
+        _TMP_STORAGE_FUNCTION_2.extend(_TMP_FUNCTION)
+        _TMP_FUNCTION.clear()
+        _TMP_FUNCTION.extend(_TMP_STORAGE_FUNCTION_1)
+        _TMP_STORAGE_FUNCTION_1.clear()
+        _TMP_STORAGE_FUNCTION_1.extend(_TMP_STORAGE_FUNCTION_2)
     
 class cb_image:
     '''对图像进行处理'''

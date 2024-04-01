@@ -5,10 +5,54 @@
 ################################################################
 
 
-from .variable import block_list,fill_handle,clone_handle
+from ._block_infor import block_list
 from .define import _TMP_POS
 from .tools import command_str,tmp_function
 from .game import position_list,position
+
+class fill_handle:
+    '''填充时旧方块的处理方式'''
+    destory='destory'
+    '''破坏原有方块变为掉落物'''
+    hollow='hollow'
+    '''填充未空心长方体'''
+    keep='keep'
+    '''仅替换空气方块'''
+    outline='outline'
+    '''仅替换外层方块'''
+    replace='replace'
+    '''替换指定方块'''        
+    
+class _clone_handle_attr:
+    '''clone 模式副属性'''
+    def __init__(self,handle:str=None,block_bit:bool=False) -> None:
+        self._handle=handle
+        self._block_bit=block_bit
+    
+    def _tmp(self,handle_attr,block:block_list):
+        if self._block_bit:  return f"{self._handle} {handle_attr} {block}"
+        else:   return f"{self._handle} {handle_attr}"
+        
+    def normal(self,block:block_list=block_list.iron_block):
+        '''不执行force 与 move'''
+        return self._tmp("normal",block)
+    
+    def force(self,block:block_list=block_list.iron_block):
+        '''强制复制'''
+        return self._tmp("force",block)
+
+    def move(self,block:block_list=block_list.iron_block):
+        '''将源区域移动到目标区域'''
+        return self._tmp("move",block)
+        
+class clone_handle:
+    '''clone 模式'''
+    fillered=_clone_handle_attr(handle="fillered",block_bit=True)
+    '''仅复制符合方块ID的方块'''
+    masked=_clone_handle_attr(handle="masked")
+    '''仅复制非空气方块'''
+    replace=_clone_handle_attr(handle="replace")
+    '''复制所有方块'''
 
 class _pos_transformation(position_list):
     '''坐标变换，使方块操作更加优雅'''

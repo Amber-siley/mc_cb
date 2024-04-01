@@ -2098,7 +2098,7 @@ class block_list(_block_list):
 color_block_62 = {
     block_list.glass: (0, 0, 0),
     block_list.slime: (127, 178, 56),
-    block_list.glowstone: (247, 233, 163),
+    block_list.sandstone: (247, 233, 163),
     block_list.brown_mushroom_block.huge_mushroom_bits[15]: (199, 199, 199),
     block_list.redstone_block: (255, 0, 0),
     block_list.blue_ice: (160, 160, 255),
