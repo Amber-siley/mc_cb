@@ -29,7 +29,7 @@ class scoreboard_obj:
         return command_str("objectives","add",name,"dummy",show_name)
     
     def remove(name:str):
-        return command_str("objectives","remove","name")
+        return command_str("objectives","remove",name)
     
     class setdisplay:
         def _ending(name:str,display:str,ascending:bool=True):

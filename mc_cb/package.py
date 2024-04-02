@@ -212,11 +212,11 @@ class behavior_pack(file_manage):
         self.rm(join(tmp_mcaddon_path))
         self.rename(zip_path,file_name)
     
-    def add_func(self,is_alive:bool=False,is_repeat:bool=False,save_tree:str=None,func_name=True,opertimizing:bool=False,*condition:Callable):
+    def add_func(self,is_alive:bool=False,is_repeat:bool=False,save_tree:str=None,func_name=False,opertimizing:bool=False,*condition:Callable):
         '''装饰器'''
         def tmp_1(function:Callable,*args, **kwargs):
             name=func_name
-            if func_name:
+            if not func_name:
                 name=function.__name__
             if is_repeat:
                 self.tick(name)
@@ -256,13 +256,13 @@ class behavior_pack(file_manage):
         if len(_TMP_FUNCTION) <= 10000:
             fp.write("\n".join(_TMP_FUNCTION))
             if not first_run and opertimizing:
-                write_now(scoreboard(scoreboard.player.add(scoreboard.target("@s"),func_name,1)))
+                write_now(scoreboard(scoreboard.obj.remove(func_name)))
         else:
             if first_run and opertimizing:
                 tmp_function.Tmp_storage()
                 name=func_name
                 scoreboard(scoreboard.obj.add(name,f"{name}_Display"))
-                scoreboard(scoreboard.obj.setdisplay.sidebar(name))
+                # scoreboard(scoreboard.obj.setdisplay.sidebar(name))
                 scoreboard(scoreboard.player.Set(scoreboard.target("@s"),name,0))
                 self.write_function(save_tree=save_tree,func_name=func_name)
                 tmp_function.cls()
@@ -271,20 +271,20 @@ class behavior_pack(file_manage):
                 tmp_function.Tmp_storage()
                 self.SystemRunFunction(function_name,f"{func_name}",index_len)
                 tmp_function.Tmp_storage()
-                self.write_function(save_tree,func_name,addon_str,index,False)
+                self.write_function(save_tree,func_name,addon_str,index,False,opertimizing)
             elif opertimizing:
                 fp.write("\n".join(_TMP_FUNCTION[:9990]))
                 write_now(scoreboard(scoreboard.player.add(scoreboard.target("@s"),func_name,1)))
                 tmp_function.cut(9990)
             # write_now(schedule(schedule.handle.cube(),f"{function_name}{addon_str}"))
                 fp.close()
-                self.write_function(save_tree,func_name,addon_str,index,False)
-            else:
+                self.write_function(save_tree,func_name,addon_str,index,False,opertimizing)
+            elif not opertimizing:
                 fp.write("\n".join(_TMP_FUNCTION[:10000]))
                 fp.close()
                 tmp_function.cut(10000)
                 index += 1
-                self.write_function(save_tree,func_name,addon_str,index)
+                self.write_function(save_tree,func_name,addon_str,index,opertimizing=opertimizing)
             return 0
     
     def tick(self,*adds:str):
@@ -302,8 +302,8 @@ class behavior_pack(file_manage):
         json_manage(tick_path).write(tick,exist=True)
     
     def SystemRunFunction(self,function:str,name,len_index:int):
-        @self.add_func(is_repeat=True,func_name=name)
+        @self.add_func(is_repeat=True,func_name=f"System_{name}")
         def RunFunctionsManage():
             functions=[f"{function}_{i}" for i in range(len_index)]
             for i in range(len(functions)):
-                execute(Function(functions[i]),execute.As("@s",execute.As.score[name,i]))
+                execute(Function(functions[i]),execute.As("@a",execute.As.score[name,i]))
