@@ -9,10 +9,12 @@ class position:
     
     @staticmethod
     def return_pos(pos:list[int],format:list[tuple[str,str]]) ->list[tuple[str,str]]:
+        '''返回坐标列表'''
         return [(format[index][0],str(value)) for index,value in enumerate(pos)]
     
     @staticmethod
     def pos_type(pos):
+        '''返回坐标类型'''
         tmp=[i for i,j in pos if i in ["~","^"]]
         if len(tmp) == 3:
             pos_type="relative"
@@ -23,7 +25,8 @@ class position:
         return pos_type
         
     @staticmethod
-    def real_pos(pos):
+    def real_pos(pos) ->list[tuple[str,str]]:
+        '''真实坐标,返回坐标列表'''
         if isinstance(pos,list) or isinstance(pos,tuple):
             if isinstance(pos[0],tuple):
                 return pos

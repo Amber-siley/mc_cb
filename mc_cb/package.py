@@ -9,7 +9,7 @@ from zipfile import ZipFile
 from math import ceil
 
 from .define import _TMP_FUNCTION
-from .tools import _attr_value,tmp_function
+from .base import _attr_value,tmp_function
 from .commands import execute,scoreboard,Function,schedule
     
 class file_manage:

@@ -7,7 +7,7 @@
 
 from ._block_infor import block_list
 from .define import _TMP_POS
-from .tools import command_str,tmp_function
+from .base import command_str,tmp_function
 from .game import position_list,position
 
 class fill_handle:

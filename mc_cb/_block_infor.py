@@ -2159,3 +2159,5 @@ color_block_62 = {
     block_list.raw_iron_block: (216, 175, 147),
     block_list.verdant_froglight: (127, 167, 150)
 }
+'''62色的颜色对应字典{block_name:(RGB)...}'''
+

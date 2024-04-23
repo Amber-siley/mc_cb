@@ -1,6 +1,6 @@
 from typing import Literal
 
-from .tools import _attr_value,command_str
+from .base import _attr_value,command_str
 from ._entity_infor import entity_type
 
 

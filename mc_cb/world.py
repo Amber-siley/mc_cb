@@ -1,6 +1,6 @@
 from typing import Literal
 
-from .tools import command_str,tmp_function
+from .base import command_str,tmp_function
 from .game import position
 from .variable import target,score_oper_hanld
 
