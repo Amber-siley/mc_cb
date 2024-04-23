@@ -1,10 +1,4 @@
 from typing import Callable,Any
-from math import sqrt
-
-import PIL.JpegImagePlugin
-from numba import jit
-from PIL import Image
-import numpy as np
 
 from .define import _TMP_FUNCTION,_TMP_STORAGE_FUNCTION_1,_TMP_STORAGE_FUNCTION_2
 
@@ -77,29 +71,6 @@ class tmp_function:
         _TMP_STORAGE_FUNCTION_1.clear()
         _TMP_STORAGE_FUNCTION_1.extend(_TMP_STORAGE_FUNCTION_2)
     
-class cb_image:
-    '''对图像进行处理'''
-    def __init__(self,file:str | PIL.JpegImagePlugin.JpegImageFile,width:int=None,height:int=None,quality:int=5) -> None:
-        self.file=file
-        if isinstance(self.file,str):
-            self.png=Image.open(file)
-        else:
-            self.png=file
-        self.png.convert("RGB")
-        png=self.png
-        if width and height:
-            png=png.resize((width,height),quality)
-        elif width:
-            height=int(png.size[1]*(width/png.size[0]))
-            png=png.resize((width,height),quality)
-        elif height:
-            width=int(png.size[0]*(height/png.size[1]))
-            png=png.resize((width,height),quality)
-        self.png=png
-        self.width,self.height=png.size
-        self.png_data=png.getdata()
-        self.RGB=np.asarray(self.png_data).reshape(self.height,self.width,3)
-    
 def command_str(*commands):
     '''按照给与的字符串生成指令'''
     return_data=""
@@ -109,13 +80,6 @@ def command_str(*commands):
         if index+1<max: return_data+=" "
     return return_data
 
-@jit(nopython=True,cache=True)
-def _color_distance_formula(R_mean,R,G,B):
-    return sqrt((2+R_mean/156)*(R**2)+4*(G**2)+(2+(256-R_mean)/256)*(B**2))
-
-def color_distance(rgb_1:tuple[int] | list[int],rgb_2:tuple[int] | list[int]):
-    '''颜色差异，加权欧式距离'''
-    R_mean=(rgb_1[0]+rgb_2[0])/2
-    R,G,B=[rgb_1[i]-rgb_2[i] for i in range(3)]
-    return _color_distance_formula(R_mean,R,G,B)
-
+def overloadfunc(*args, **kwargs):
+    def _(function:Callable):
+        ...
