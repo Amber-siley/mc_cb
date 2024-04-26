@@ -186,6 +186,7 @@ class behavior_pack(file_manage):
         '''行为包工程文件夹名称'''
         self.MANIFEST=_manifest()
         self.MANIFEST.header.name=self.FILE_NAME
+        self.create_behavior_pack()
         
     @property
     def function_path(self):
@@ -273,9 +274,9 @@ class behavior_pack(file_manage):
                 tmp_function.Tmp_storage()
                 self.write_function(save_tree,func_name,addon_str,index,False,opertimizing)
             elif opertimizing:
-                fp.write("\n".join(_TMP_FUNCTION[:9990]))
+                fp.write("\n".join(_TMP_FUNCTION[:9000]))
                 write_now(scoreboard(scoreboard.player.add(scoreboard.target("@s"),func_name,1)))
-                tmp_function.cut(9990)
+                tmp_function.cut(9000)
             # write_now(schedule(schedule.handle.cube(),f"{function_name}{addon_str}"))
                 fp.close()
                 self.write_function(save_tree,func_name,addon_str,index,False,opertimizing)

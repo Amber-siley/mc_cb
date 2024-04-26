@@ -1,5 +1,5 @@
 from mc_cb.variable import target_attrs
-from .tools import command_str,tmp_function
+from .base import command_str,tmp_function
 from .variable import target,target_obj,score_oper_hanld
 from typing import Literal
 
